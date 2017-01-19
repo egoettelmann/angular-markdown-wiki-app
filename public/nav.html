@@ -1,0 +1,38 @@
+<nav class="navbar navbar-default navbar-fixed-top">
+  <div class="container-fluid">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand clickable" ng-click="goToTop()">WikiApp</a>
+    </div>
+
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+      <ul class="nav navbar-nav">
+        <li ui-sref-active="active" ng-repeat="(route, children) in routes" ng-class="{'dropdown': !isEmpty(children)}">
+          <a ng-if="isEmpty(children)" ui-sref="{{ route }}">{{ formatRouteDisplayName(route) }}</a>
+          <a ng-if="!isEmpty(children)" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{ formatRouteDisplayName(route) }}<span class="caret"></span></a>
+          <ul ng-if="!isEmpty(children)" class="dropdown-menu">
+            <li ng-repeat="(sub_route, sub_children) in children"><a ui-sref="{{ route + '.' + sub_route }}">{{ formatRouteDisplayName(sub_route) }}</a></li>
+          </ul>
+        </li>
+      </ul>
+      <form class="navbar-form navbar-right">
+        <div class="form-group">
+          <input type="text" class="form-control" placeholder="Search on page">
+        </div>
+      </form>
+    </div>
+  </div>
+  <script>
+  $('input[type="text"').jsearch({
+      rowClass: 'section',
+      fieldClass: 'section'
+  });
+</script>
+</nav>

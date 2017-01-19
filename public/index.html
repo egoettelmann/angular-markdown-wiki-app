@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html ng-app="wikiApp">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+		
+		<title>Local Wiki</title>
+		
+		<link rel="stylesheet" href="./css/bootstrap.min.css" />
+		<link rel="stylesheet" href="./css/font-awesome.min.css" />
+		<link rel="stylesheet" href="./css/awesome-bootstrap-checkbox.css" />
+		<link rel="stylesheet" href="./css/highlightjs.css" />
+		<link rel="stylesheet" href="./css/style.css" />
+		
+		<script src="./js/ext.min.js"></script>
+		<script src="./js/app.min.js"></script>
+	</head>
+	<body>
+	
+		<ng-include src="'./nav.html'"></ng-include>
+
+		<div class="container" id="container">
+			<ui-view></ui-view>
+		</div>
+
+	</body>
+</html>
