@@ -60,14 +60,8 @@ md.renderer.rules.emoji = function(token, idx) {
 };
 
 gulp.task('default', ['js']);
-gulp.task('all', ['default', 'ext-js', 'highlight']);
-
-gulp.task('highlight', function() {
-	var style_name = 'darcula';
-	return gulp.src('./node_modules/highlight.js/styles/' + style_name + '.css')
-		.pipe(rename('highlightjs.css'))
-		.pipe(gulp.dest('./public/css'));
-});
+gulp.task('all', ['default', 'ext-js', 'ext-css', 'ext-fonts']);
+gulp.task('init', ['default', 'ext-js', 'ext-css', 'ext-fonts']);
 
 gulp.task('ext-js', function() {
 	return gulp.src([
@@ -81,6 +75,25 @@ gulp.task('ext-js', function() {
 		.pipe(uglify({ preserveComments: 'license' }))
 		.pipe(rename({ suffix: '.min'}))
 		.pipe(gulp.dest('./public/js/'))
+});
+
+gulp.task('ext-css', function() {
+	return gulp.src([
+			CONFIG.BOWER_DIR + 'bootstrap/dist/css/bootstrap.css',
+			CONFIG.BOWER_DIR + 'font-awesome/css/font-awesome.css',
+			CONFIG.BOWER_DIR + 'awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css',
+			'./node_modules/highlight.js/styles/' + appConfig.highlightTheme + '.css'
+		])
+		.pipe(concat('ext.css'))
+		.pipe(gulp.dest('./public/css/'))
+});
+
+gulp.task('ext-fonts', function() {
+	return gulp.src([
+			CONFIG.BOWER_DIR + 'font-awesome/fonts/*',
+			CONFIG.BOWER_DIR + 'bootstrap/dist/fonts/*',
+		])
+		.pipe(gulp.dest('./public/fonts/'))
 });
 
 gulp.task('js', ['markdown'], function() {

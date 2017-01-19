@@ -1,3 +1,4 @@
 module.exports = {
-	"defaultRoute": "/cheatsheets/markdown"
+	"defaultRoute": "/cheatsheets/markdown",
+	"highlightTheme": 'darcula'
 };

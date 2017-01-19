@@ -1,0 +1,12 @@
+bower_components/*
+node_modules/*
+
+resources/content/*
+resources/scripts/routes.js
+
+public/app/*
+public/img/*
+public/js/*
+public/css/
+
+config
