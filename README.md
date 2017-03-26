@@ -50,19 +50,21 @@ The last step is to build the app through Gulp:
 gulp all
 ```
 
-Now, to access the app, you need to have a webserver (like [Apache](https://httpd.apache.org/download.cgi)) that points to the `public` folder of the project.
+### Usage
 
-### First steps
+Now, to access the app, you need to have a webserver (like [Apache](https://httpd.apache.org/download.cgi)) that points to the `public` folder of the project.
 
 Place your markdown files into the `resources/content` folder. Do not hesitate to create folders to organize your files, it will create different entries into the app's navbar.
 
-To generate the app's content, simply run the following command:
+To generate the app's content, simply run the Gulp default command:
 
 ```sh
 gulp
 ```
 
-#### Configuration
+Each time you change or add a file, you have to re-run this command to re-generate the app's content.
+
+### Configuration
 
 In the configuration file you can specify following options:
 
