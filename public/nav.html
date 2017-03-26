@@ -14,11 +14,33 @@
     <!-- Collect the nav links, forms, and other content for toggling -->
     <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
       <ul class="nav navbar-nav">
+        
+        <!-- List of first level routes -->
         <li ui-sref-active="active" ng-repeat="(route, children) in routes" ng-class="{'dropdown': !isEmpty(children)}">
           <a ng-if="isEmpty(children)" ui-sref="{{ route }}">{{ formatRouteDisplayName(route) }}</a>
           <a ng-if="!isEmpty(children)" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">{{ formatRouteDisplayName(route) }}<span class="caret"></span></a>
           <ul ng-if="!isEmpty(children)" class="dropdown-menu">
-            <li ng-repeat="(sub_route, sub_children) in children"><a ui-sref="{{ route + '.' + sub_route }}">{{ formatRouteDisplayName(sub_route) }}</a></li>
+          
+            <!-- List of second level routes -->
+            <li ng-repeat="(sub_route, sub_children) in children" ng-class="{'dropdown-submenu': !isEmpty(sub_children)}">
+              <a ng-if="isEmpty(sub_children)" ui-sref="{{ route + '.' + sub_route }}">{{ formatRouteDisplayName(sub_route) }}</a>
+              <a ng-if="!isEmpty(sub_children)" role="button">{{ formatRouteDisplayName(sub_route) }}</a>
+              <ul ng-if="!isEmpty(sub_children)" class="dropdown-menu">
+              
+                <!-- List of third level routes -->
+                <li ng-repeat="(sub_sub_route, sub_sub_children) in sub_children" ng-class="{'dropdown-submenu': !isEmpty(sub_sub_children)}">
+                  <a ng-if="isEmpty(sub_sub_children)" ui-sref="{{ route + '.' + sub_route + '.' + sub_sub_route }}">{{ formatRouteDisplayName(sub_sub_route) }}</a>
+                  <a ng-if="!isEmpty(sub_sub_children)" role="button">{{ formatRouteDisplayName(sub_sub_route) }}</a>
+                  <ul ng-if="!isEmpty(sub_sub_children)" class="dropdown-menu">
+                    
+                    <!-- List of fourth level routes -->
+                    <li ng-repeat="(sub_sub_sub_route, sub_sub_sub_children) in sub_sub_children">
+                      <a ui-sref="{{ route + '.' + sub_route + '.' + sub_sub_route + '.' + sub_sub_sub_route }}">{{ formatRouteDisplayName(sub_sub_sub_route) }}</a>
+                    </li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
           </ul>
         </li>
       </ul>

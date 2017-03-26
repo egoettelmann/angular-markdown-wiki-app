@@ -75,7 +75,7 @@ function formatConcreteRoute(routeName, parents) {
 function formatAbstractRoute(routeName, parents) {
 	var prefix = '';
 	angular.forEach(parents, function(parent) {
-		prefix += prefix + '.';
+		prefix += parent + '.';
 	});
 	return {
 		name: prefix + routeName,
