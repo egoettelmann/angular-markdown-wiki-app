@@ -47,7 +47,7 @@ At the root of the folder, you will find a `config-sample` file. Copy and rename
 The last step is to build the app through Gulp:
 
 ```sh
-gulp all
+gulp init
 ```
 
 ### Usage

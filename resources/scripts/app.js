@@ -31,6 +31,7 @@ wikiApp.config(['$provide', '$stateProvider', '$urlRouterProvider', function($pr
 		});
 	}
 	addRoutes(routes, []);
+	addRoutes(aboutRoutes, []);
 	
 	$urlRouterProvider.otherwise(defaultRoute);
 

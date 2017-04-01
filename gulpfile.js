@@ -13,6 +13,7 @@ var markdownItPlugins = {
 	checkbox: 	require('markdown-it-task-checkbox'),
 	toc: 		require('markdown-it-github-toc'),
 	sections: 	require('markdown-it-header-sections'),
+	container: 	require('markdown-it-container'),
 	emoji: 		require('markdown-it-emoji'),
 	icons: 		require('markdown-it-fontawesome')
 };
@@ -20,9 +21,26 @@ var appConfig	= require('./config');
 
 var CONFIG = {
 	BOWER_DIR: './bower_components/',
-	JS_DIR: './resources/scripts/'
+	JS_DIR: './resources/scripts/',
+	CONTENT_DIR: './resources/content/'
 };
-			
+
+function alertOptions(name) {
+	return {
+		validate: function(params) {
+			var regex = new RegExp('^alert-' + name + '+(.*)$');
+			return params.trim().match(regex);
+		},
+		render: function(tokens, idx, _options, env, self) {
+			// add a class to the opening tag
+			if (tokens[idx].nesting === 1) {
+				tokens[idx].attrPush([ 'class', 'alert alert-' + name ]);
+			}
+			return self.renderToken(tokens, idx, _options, env, self);
+		}
+	}
+}
+
 var md = new markdownIt({
 		highlight: function (str, lang) {
 			if (lang && hljs.getLanguage(lang)) {
@@ -44,6 +62,10 @@ var md = new markdownIt({
 		uiRouterLinks: true
 	})
 	.use(markdownItPlugins.sections)
+	.use(markdownItPlugins.container, 'alert-success', alertOptions('success'))
+	.use(markdownItPlugins.container, 'alert-warning', alertOptions('warning'))
+	.use(markdownItPlugins.container, 'alert-danger', alertOptions('danger'))
+	.use(markdownItPlugins.container, 'alert-info', alertOptions('info'))
 	.use(markdownItPlugins.emoji, {})
 	.use(markdownItPlugins.icons);
 
@@ -60,8 +82,7 @@ md.renderer.rules.emoji = function(token, idx) {
 };
 
 gulp.task('default', ['js']);
-gulp.task('all', ['default', 'ext-js', 'ext-css', 'ext-fonts']);
-gulp.task('init', ['default', 'ext-js', 'ext-css', 'ext-fonts']);
+gulp.task('init', ['default', 'ext-js', 'ext-css', 'ext-fonts', 'app-markdown']);
 
 gulp.task('ext-js', function() {
 	return gulp.src([
@@ -107,10 +128,29 @@ gulp.task('js', ['markdown'], function() {
 		.pipe(gulp.dest('./public/js/'))
 });
 
+gulp.task('app-markdown', function() {
+	return gulp.src('./resources/scripts/about/**/*.md')
+		.pipe(tap(function (file) {
+				var result = md.render(file.contents.toString());
+				file.contents = new Buffer(result);
+				file.path = gutil.replaceExtension(file.path, '.html');
+				return;
+			})
+		)
+		.pipe(gulp.dest('./public/app/about/'));
+});
+
 gulp.task('markdown', function() {
 	var fileTree = {};
+
+	var aboutRoutesText = 'var aboutRoutes = ';
+	var aboutRoutes = {};
+	if (!appConfig.disableAbout || appConfig.disableAbout) {
+		aboutRoutes = {'about': {'markdown-cheatsheet': {}, 'documentation': {}, 'release-notes': {}, 'about': {}}};
+	}
+	aboutRoutesText+= JSON.stringify(aboutRoutes, null, "\t");
 	
-	return gulp.src('./resources/content/**/*.md')
+	return gulp.src(CONFIG.CONTENT_DIR + '**/*.md')
 		.pipe(tap(function (file) {
 				var result = md.render(file.contents.toString());
 				file.contents = new Buffer(result);
@@ -135,7 +175,7 @@ gulp.task('markdown', function() {
 		.on('end', function() {
 			fs.writeFile(
 				CONFIG.JS_DIR + 'routes.js', 
-				'var defaultRoute = "' + appConfig.defaultRoute + '";var routes = ' + JSON.stringify(fileTree, null, "\t")
+				'var defaultRoute = "' + appConfig.defaultRoute + '";var routes = ' + JSON.stringify(fileTree, null, "\t") + ';' + aboutRoutesText
 			);
 		});
 });
