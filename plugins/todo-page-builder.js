@@ -22,14 +22,12 @@ module.exports = function todoPageBuilder(md, opts) {
       for (var i = 2; i < tokens.length; i++) {
         var token = tokens[i];
         if (token.content.indexOf('[ ] ') === 0 || token.content.indexOf('[x] ') === 0 || token.content.indexOf('[X] ') === 0) {
-          if (!_todoItems.hasOwnProperty(state.env.fileName)) {
-            objectPath.set(_todoItems, state.env.fileName, '');
-          }
           var indent = "";
           for (var j = 4; j < token.level; j++) {
             indent += " ";
           }
-          objectPath.set(_todoItems, state.env.fileName, objectPath.get(_todoItems, state.env.fileName) + indent + '- ' + token.content + "\r\n");
+          var existingContent = objectPath.get(_todoItems, state.env.fileName, '');
+          objectPath.set(_todoItems, state.env.fileName, existingContent + indent + '- ' + token.content + "\r\n");
         }
       }
     }
