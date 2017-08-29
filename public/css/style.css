@@ -14,6 +14,13 @@
 	padding-left: 2rem;
 }
 
+.markdownIt-color:empty {
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    border-radius: 50%;
+}
+
 h1[id]:before,
 h2[id]:before,
 h3[id]:before,

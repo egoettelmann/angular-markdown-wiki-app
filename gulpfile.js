@@ -10,6 +10,7 @@ var objectPath  = require("object-path");
 var hljs 		= require('highlight.js');
 var markdownIt 	= require('markdown-it');
 var markdownItPlugins = {
+	colors: 	require('./colors.js'),
 	checkbox: 	require('markdown-it-task-checkbox'),
 	toc: 		require('markdown-it-github-toc'),
 	sections: 	require('markdown-it-header-sections'),
@@ -62,6 +63,7 @@ var md = new markdownIt({
 		uiRouterLinks: true
 	})
 	.use(markdownItPlugins.sections)
+	.use(markdownItPlugins.colors)
 	.use(markdownItPlugins.container, 'alert-success', alertOptions('success'))
 	.use(markdownItPlugins.container, 'alert-warning', alertOptions('warning'))
 	.use(markdownItPlugins.container, 'alert-danger', alertOptions('danger'))

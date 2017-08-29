@@ -5,6 +5,13 @@ Release notes
 
 ## Release history
 
+### 1.0.1-SNAPSHOT
+
+ - Added support for Bootstrap modals
+ - Added possibility to define colored sections (with CSS names or hexa code)
+ - Added auto-generated todo-list page
+ - Minor code refactoring
+
 ### 1.0.0
 
  - First release of the app
@@ -19,6 +26,6 @@ Release notes
 
 ## Planned features
 
- - Modals
- - Colored sections (with hexa code)
  - Math formulas
+ - Standalone run (through Gulp webserver)
+ - Handle resources such as images, documents, etc.
