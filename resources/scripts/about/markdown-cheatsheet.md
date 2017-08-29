@@ -228,3 +228,11 @@ You can also nest inline `markdown` inside modals and even block markdown such a
 }
 ```
 {modal}
+
+```md
+[open link](modal:myModal)
+
+{modal[myModal]:My modal}
+Modal content.
+{modal}
+```

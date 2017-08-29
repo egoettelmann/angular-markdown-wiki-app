@@ -9,7 +9,6 @@ var path 		= require('path');
 var hljs 		= require('highlight.js');
 var markdownIt 	= require('markdown-it');
 var markdownItPlugins = {
-	colors: 	require('./colors.js'),
 	checkbox: 	require('markdown-it-task-checkbox'),
 	toc: 		require('markdown-it-github-toc'),
 	sections: 	require('markdown-it-header-sections'),
@@ -17,7 +16,8 @@ var markdownItPlugins = {
 	emoji: 		require('markdown-it-emoji'),
 	icons: 		require('markdown-it-fontawesome'),
 	modals:		require('./plugins/markdown-it-modals'),
-	alerts:		require('./plugins/markdown-it-alerts')
+	alerts:		require('./plugins/markdown-it-alerts'),
+	colors: 	require('./plugins/markdown-it-colors.js')
 };
 var appPlugins = {
 	uiRoutes:   require('./plugins/ui-router-builder'),
