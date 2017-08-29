@@ -6,7 +6,6 @@ var rename 		= require('gulp-rename');
 var uglify 		= require('gulp-uglify');
 var fs 			= require('fs');
 var path 		= require('path');
-var objectPath  = require("object-path");
 var hljs 		= require('highlight.js');
 var markdownIt 	= require('markdown-it');
 var markdownItPlugins = {
@@ -15,7 +14,13 @@ var markdownItPlugins = {
 	sections: 	require('markdown-it-header-sections'),
 	container: 	require('markdown-it-container'),
 	emoji: 		require('markdown-it-emoji'),
-	icons: 		require('markdown-it-fontawesome')
+	icons: 		require('markdown-it-fontawesome'),
+	modals:		require('./plugins/markdown-it-modals'),
+	alerts:		require('./plugins/markdown-it-alerts')
+};
+var appPlugins = {
+	uiRoutes:   require('./plugins/ui-router-builder'),
+	todoPage:   require('./plugins/todo-page-builder')
 };
 var appConfig	= require('./config');
 
@@ -24,22 +29,6 @@ var CONFIG = {
 	JS_DIR: './resources/scripts/',
 	CONTENT_DIR: './resources/content/'
 };
-
-function alertOptions(name) {
-	return {
-		validate: function(params) {
-			var regex = new RegExp('^alert-' + name + '+(.*)$');
-			return params.trim().match(regex);
-		},
-		render: function(tokens, idx, _options, env, self) {
-			// add a class to the opening tag
-			if (tokens[idx].nesting === 1) {
-				tokens[idx].attrPush([ 'class', 'alert alert-' + name ]);
-			}
-			return self.renderToken(tokens, idx, _options, env, self);
-		}
-	}
-}
 
 var md = new markdownIt({
 		highlight: function (str, lang) {
@@ -62,12 +51,10 @@ var md = new markdownIt({
 		uiRouterLinks: true
 	})
 	.use(markdownItPlugins.sections)
-	.use(markdownItPlugins.container, 'alert-success', alertOptions('success'))
-	.use(markdownItPlugins.container, 'alert-warning', alertOptions('warning'))
-	.use(markdownItPlugins.container, 'alert-danger', alertOptions('danger'))
-	.use(markdownItPlugins.container, 'alert-info', alertOptions('info'))
 	.use(markdownItPlugins.emoji, {})
-	.use(markdownItPlugins.icons);
+	.use(markdownItPlugins.icons)
+	.use(markdownItPlugins.alerts, {})
+	.use(markdownItPlugins.modals, {});
 
 md.renderer.rules.table_open = function (tokens, idx, options, env, self) {
     return '<div class="table-responsive">\n'
@@ -141,41 +128,28 @@ gulp.task('app-markdown', function() {
 });
 
 gulp.task('markdown', function() {
-	var fileTree = {};
-
-	var aboutRoutesText = 'var aboutRoutes = ';
-	var aboutRoutes = {};
-	if (!appConfig.disableAbout || appConfig.disableAbout) {
-		aboutRoutes = {'about': {'markdown-cheatsheet': {}, 'documentation': {}, 'release-notes': {}, 'about': {}}};
+	if (appConfig.todoRoute) {
+		appConfig.additionalRoutes = {'todo': {}};
 	}
-	aboutRoutesText+= JSON.stringify(aboutRoutes, null, "\t");
+	var routesBuilder = appPlugins.uiRoutes(appConfig);
+	var todoBuilder = appPlugins.todoPage(md, appConfig);
 	
 	return gulp.src(CONFIG.CONTENT_DIR + '**/*.md')
 		.pipe(tap(function (file) {
-				var result = md.render(file.contents.toString());
+				var fileInfo = path.parse(file.path);
+				var fileName = path.basename(fileInfo.base, '.md');
+				var result = md.render(file.contents.toString(), {
+					fileName: fileName
+				});
 				file.contents = new Buffer(result);
 				file.path = gutil.replaceExtension(file.path, '.html');
 				return;
 			})
 		)
-		.pipe(tap(function (file) {
-				var fileInfo = path.parse(file.path);
-				var fileName = path.basename(fileInfo.base, '.html');
-				var pathList = [];
-				var relPath = path.relative('./resources/content/', fileInfo.dir);
-				if (relPath !== '') {
-					pathList = relPath.split(path.sep);
-				}
-				pathList.push(fileName);
-				objectPath.set(fileTree, pathList, {});
-				return;
-			})
-		)
+		.pipe(tap(routesBuilder.gather))
 		.pipe(gulp.dest('./public/app/'))
 		.on('end', function() {
-			fs.writeFile(
-				CONFIG.JS_DIR + 'routes.js', 
-				'var defaultRoute = "' + appConfig.defaultRoute + '";var routes = ' + JSON.stringify(fileTree, null, "\t") + ';' + aboutRoutesText
-			);
+			routesBuilder.write(CONFIG.JS_DIR + 'routes.js');
+			todoBuilder.write('./public/app/todo.html');
 		});
 });

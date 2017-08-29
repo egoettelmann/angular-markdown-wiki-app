@@ -156,3 +156,19 @@ This is a danger message (`alert-danger`)
 ::: alert-success
 This is a success message (`alert-success`)
 :::
+
+## Modals
+
+You can easily create modals and reference them through [links](modal:exampleModal).
+
+{modal[exampleModal]:An example modal}
+With some example content.
+
+You can also nest inline `markdown` inside modals and even block markdown such as code blocks:
+
+```css
+.modal {
+    width: 80%;
+}
+```
+{modal}
