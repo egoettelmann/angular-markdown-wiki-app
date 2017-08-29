@@ -140,8 +140,14 @@ gulp.task('markdown', function() {
 		.pipe(tap(function (file) {
 				var fileInfo = path.parse(file.path);
 				var fileName = path.basename(fileInfo.base, '.md');
+				var pathList = [];
+				var relPath = path.relative('./resources/content/', fileInfo.dir);
+				if (relPath !== '') {
+					pathList = relPath.split(path.sep);
+				}
+				pathList.push(fileName);
 				var result = md.render(file.contents.toString(), {
-					fileName: fileName
+					fileName: pathList
 				});
 				file.contents = new Buffer(result);
 				file.path = gutil.replaceExtension(file.path, '.html');

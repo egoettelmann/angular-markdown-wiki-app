@@ -23,16 +23,30 @@ module.exports = function todoPageBuilder(md, opts) {
         var token = tokens[i];
         if (token.content.indexOf('[ ] ') === 0 || token.content.indexOf('[x] ') === 0 || token.content.indexOf('[X] ') === 0) {
           if (!_todoItems.hasOwnProperty(state.env.fileName)) {
-            _todoItems[state.env.fileName] = '';
+            objectPath.set(_todoItems, state.env.fileName, '');
           }
+          var indent = "";
           for (var j = 4; j < token.level; j++) {
-            _todoItems[state.env.fileName] += " ";
+            indent += " ";
           }
-          _todoItems[state.env.fileName] += '- ' + token.content + "\r\n";
+          objectPath.set(_todoItems, state.env.fileName, objectPath.get(_todoItems, state.env.fileName) + indent + '- ' + token.content + "\r\n");
         }
       }
     }
   });
+  
+  function nestedTodo(object, titlePrefix) {
+    var todoFileContent = '';
+    for (var todoKey in object) {
+      todoFileContent += titlePrefix + ' ' + todoKey + "\r\n";
+      if (typeof object[todoKey] === 'string' || object[todoKey] instanceof String) {
+        todoFileContent += object[todoKey];
+      } else {
+        todoFileContent += nestedTodo(object[todoKey], titlePrefix + "#");
+      }
+    }
+    return todoFileContent;
+  }
   
   return {
     /*
@@ -40,11 +54,7 @@ module.exports = function todoPageBuilder(md, opts) {
     */
     write: function (outputFile) {
       if (opts.todoRoute) {
-        var todoFileContent = '# TODO-List' + "\r\n" + "[TOC]" + "\r\n";
-        for (var todoKey in _todoItems) {
-          todoFileContent += '## ' + todoKey + "\r\n";
-          todoFileContent += _todoItems[todoKey];
-        }
+        var todoFileContent = '# TODO-List' + "\r\n" + "[TOC]" + "\r\n" + nestedTodo(_todoItems, "##");
         fs.writeFile(
           outputFile,
           md.render(todoFileContent)
