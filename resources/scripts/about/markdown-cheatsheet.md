@@ -212,3 +212,19 @@ You can also use it to define the background color of some inline text, by placi
 ```md
 {color:#cccccc}my text{color}
 ```
+
+## Modals
+
+You can easily create modals and reference them through [links](modal:exampleModal).
+
+{modal[exampleModal]:An example modal}
+With some example content.
+
+You can also nest inline `markdown` inside modals and even block markdown such as code blocks:
+
+```css
+.modal {
+    width: 80%;
+}
+```
+{modal}
