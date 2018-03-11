@@ -4,10 +4,13 @@ var tap 		= require('gulp-tap');
 var concat 		= require('gulp-concat');
 var rename 		= require('gulp-rename');
 var uglify 		= require('gulp-uglify');
+var webserver 	= require('gulp-webserver');
 var fs 			= require('fs');
 var path 		= require('path');
 var hljs 		= require('highlight.js');
 var markdownIt 	= require('markdown-it');
+
+//Loading the markdown-it plugins
 var markdownItPlugins = {
 	checkbox: 	require('markdown-it-task-checkbox'),
 	toc: 		require('markdown-it-github-toc'),
@@ -19,18 +22,25 @@ var markdownItPlugins = {
 	alerts:		require('./plugins/markdown-it-alerts'),
 	colors: 	require('./plugins/markdown-it-colors.js')
 };
+
+//Loading the app plugins
 var appPlugins = {
 	uiRoutes:   require('./plugins/ui-router-builder'),
 	todoPage:   require('./plugins/todo-page-builder')
 };
+
+//Loading the app config file
 var appConfig	= require('./config');
 
+//The paths required for the Gulp tasks
 var CONFIG = {
-	BOWER_DIR: './bower_components/',
-	JS_DIR: './resources/scripts/',
-	CONTENT_DIR: './resources/content/'
+	BOWER_DIR: 		'./bower_components/',
+	NODE_DIR: 		'./node_modules/',
+	JS_DIR: 		'./resources/scripts/',
+	CONTENT_DIR: 	'./resources/content/'
 };
 
+//Instantiating and configuring markdown-it and its plugins
 var md = new markdownIt({
 		highlight: function (str, lang) {
 			if (lang && hljs.getLanguage(lang)) {
@@ -58,6 +68,7 @@ var md = new markdownIt({
 	.use(markdownItPlugins.alerts, {})
 	.use(markdownItPlugins.modals, {});
 
+//Adding custom, markdown rules (tables and icons)
 md.renderer.rules.table_open = function (tokens, idx, options, env, self) {
     return '<div class="table-responsive">\n'
         + '<table class="table">\n';
@@ -70,9 +81,28 @@ md.renderer.rules.emoji = function(token, idx) {
 	return '<i class="fa fa-' + token[idx].markup + '"></i>';
 };
 
-gulp.task('default', ['js']);
+/**********************************************
+*
+*   The Gulp tasks
+*
+**********************************************/
+
+/**
+* The 'default' task.
+*  - compiles the app's pages and JS files
+**/
+gulp.task('default', ['js', 'img']);
+
+/**
+* The 'init' task.
+*  - sets up the app by compiling external dependencies
+**/
 gulp.task('init', ['default', 'ext-js', 'ext-css', 'ext-fonts', 'app-markdown']);
 
+/**
+* The 'ext-js' task.
+*  - compiles the external JS files (jQuery, Angular, Bootstrap, etc.)
+**/
 gulp.task('ext-js', function() {
 	return gulp.src([
 			CONFIG.BOWER_DIR + 'jquery/dist/jquery.js',
@@ -87,17 +117,25 @@ gulp.task('ext-js', function() {
 		.pipe(gulp.dest('./public/js/'))
 });
 
+/**
+* The 'ext-css' task.
+*  - compiles the external CSS files (Bootstrap, FontAwesome, etc.)
+**/
 gulp.task('ext-css', function() {
 	return gulp.src([
 			CONFIG.BOWER_DIR + 'bootstrap/dist/css/bootstrap.css',
 			CONFIG.BOWER_DIR + 'font-awesome/css/font-awesome.css',
 			CONFIG.BOWER_DIR + 'awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css',
-			'./node_modules/highlight.js/styles/' + appConfig.highlightTheme + '.css'
+			CONFIG.NODE_DIR + 'highlight.js/styles/' + appConfig.highlightTheme + '.css'
 		])
 		.pipe(concat('ext.css'))
 		.pipe(gulp.dest('./public/css/'))
 });
 
+/**
+* The 'ext-fonts' task.
+*  - compiles the external fonts files (Bootstrap, FontAwesome, etc.)
+**/
 gulp.task('ext-fonts', function() {
 	return gulp.src([
 			CONFIG.BOWER_DIR + 'font-awesome/fonts/*',
@@ -106,6 +144,11 @@ gulp.task('ext-fonts', function() {
 		.pipe(gulp.dest('./public/fonts/'))
 });
 
+/**
+* The 'js' task.
+*  - compiles the app's JS files
+*  - launches the 'markdown'
+**/
 gulp.task('js', ['markdown'], function() {
 	return gulp.src([
 			CONFIG.JS_DIR + 'routes.js',
@@ -117,6 +160,24 @@ gulp.task('js', ['markdown'], function() {
 		.pipe(gulp.dest('./public/js/'))
 });
 
+/**
+* The 'img' task.
+*  - copies all images to the public folder
+**/
+gulp.task('img', function() {
+	return gulp.src([
+			CONFIG.CONTENT_DIR + '**/*.jpg',
+			CONFIG.CONTENT_DIR + '**/*.jpeg',
+			CONFIG.CONTENT_DIR + '**/*.png',
+			CONFIG.CONTENT_DIR + '**/*.gif',
+		])
+		.pipe(gulp.dest('./public/img/'))
+});
+
+/**
+* The 'app-markdown' task.
+*  - compiles the application markdown files (about, release-notes, etc.)
+**/
 gulp.task('app-markdown', function() {
 	return gulp.src('./resources/scripts/about/**/*.md')
 		.pipe(tap(function (file) {
@@ -129,6 +190,10 @@ gulp.task('app-markdown', function() {
 		.pipe(gulp.dest('./public/app/about/'));
 });
 
+/**
+* The 'markdown' task.
+*  - compiles the content's markdown files
+**/
 gulp.task('markdown', function() {
 	if (appConfig.todoRoute) {
 		appConfig.additionalRoutes = {'todo': {}};
@@ -160,4 +225,32 @@ gulp.task('markdown', function() {
 			routesBuilder.write(CONFIG.JS_DIR + 'routes.js');
 			todoBuilder.write('./public/app/todo.html');
 		});
+});
+
+/**
+* The 'start' task.
+*  - launches the internal webserver and watches the files
+**/
+gulp.task('start', ['watch', 'web']);
+
+/**
+* The 'watch' task.
+*  - watches all content's file and triggers the 'default' task on change
+**/
+gulp.task('watch', function() {
+	gulp.watch(CONFIG.CONTENT_DIR + '/**/*.md', ['default']); 	
+});
+
+/**
+* The 'web' task.
+*  - launches the internal web server
+**/
+gulp.task('web', function() {
+	gulp.src('./public/')
+		.pipe(webserver({
+			port: 3000,
+			livereload: true,
+			fallback: 'index.html',
+			open: true
+		}));
 });
